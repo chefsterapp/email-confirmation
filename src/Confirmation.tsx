@@ -1,37 +1,47 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Supabase URL and anonymous key are required. Please check your .env file.");
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import './Confirmation.css';
 
 function Confirmation() {
   const location = useLocation();
+  const [status, setStatus] = useState("Confirming your email...");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const hash = location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
+    const params = new URLSearchParams(location.search);
+    const tokenHash = params.get("token_hash");
+    const type = params.get("type");
+    const email = params.get("email");
 
-    if (accessToken && refreshToken) {
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
+    if (tokenHash && type && email) {
+      fetch(`http://161.35.13.160:5000/auth/verify-email?tokenHash=${tokenHash}&type=${type}&email=${email}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          setStatus("Email confirmed successfully!");
+        })
+        .catch(error => {
+          console.error("Confirmation error:", error);
+          setError(true);
+          setStatus("Error confirming email.");
+        });
+    } else {
+        setStatus("Invalid confirmation link.");
     }
   }, [location]);
 
   return (
-    <div>
-      <h1>Confirming your email...</h1>
-      <p>You can now close this tab and return to the app.</p>
+    <div className="confirmation-container">
+      <h1>{status}</h1>
+      {error ? (
+        <p>Could not confirm your email. Please try again or contact support.</p>
+      ) : (
+        <p>You can now close this tab and return to the application.</p>
+      )}
     </div>
   );
 }
