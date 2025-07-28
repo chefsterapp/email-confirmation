@@ -21,7 +21,7 @@ function Confirmation() {
           }
           return response.json();
         })
-        .then(data => {
+        .then(_ => {
           setStatus("Email confirmed successfully!");
         })
         .catch(error => {
