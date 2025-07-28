@@ -14,7 +14,7 @@ function Confirmation() {
     const email = params.get("email");
 
     if (tokenHash && type && email) {
-      fetch(`http://161.35.13.160:5000/auth/verify-email?tokenHash=${tokenHash}&type=${type}&email=${email}`)
+      fetch(`https://chefster.the-orange-house.com/auth/verify-email?tokenHash=${tokenHash}&type=${type}&email=${email}`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
